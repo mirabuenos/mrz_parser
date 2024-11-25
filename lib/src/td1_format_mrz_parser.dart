@@ -27,30 +27,49 @@ class _TD1MRZFormatParser {
     final String optionalDataRaw;
     final bool isLongDocumentNumber;
 
-    if (firstLine[14] == '<') {
-      // Implementation for ICAO 9303 Part 5, section 4.2.4
-      // TD1 check digit for long document numbers
-      // https://www.icao.int/publications/Documents/9303_p5_cons_en.pdf
-
-      final tmpString =
-          firstLine.substring(15, 28).replaceAll(RegExp(r'<+$'), '');
-
-      documentNumberCheckDigitRaw = tmpString[tmpString.length - 1];
-
-      documentNumberRaw = firstLine.substring(5, 14) +
-          tmpString.substring(0, tmpString.length - 1);
-
-      //Unclear if optionalData1 is even allowed in this case.
-      //The ICAO doc is not so clear about it.
-      //Revise when a sample is availble...
-      optionalDataRaw = firstLine.substring(15 + tmpString.length, 30);
-      isLongDocumentNumber = true;
+    // Nueva lógica para extraer el número de documento
+    if (firstLine.startsWith('IDESP')) {
+      // Caso específico para DNI español
+      final fullNumber = firstLine.substring(5).split('<')[0];
+      final numberMatch = RegExp(r'(\d{8}[A-Z])').firstMatch(fullNumber);
+      if (numberMatch != null) {
+        documentNumberRaw = numberMatch.group(1)!;
+        documentNumberCheckDigitRaw = documentNumberRaw[documentNumberRaw.length - 1];
+        optionalDataRaw = firstLine.substring(5 + fullNumber.length, 30);
+        isLongDocumentNumber = false;
+      } else {
+        // Si no encuentra el patrón esperado, usa el método original
+        if (firstLine[14] == '<') {
+          final tmpString =
+              firstLine.substring(15, 28).replaceAll(RegExp(r'<+$'), '');
+          documentNumberCheckDigitRaw = tmpString[tmpString.length - 1];
+          documentNumberRaw = firstLine.substring(5, 14) +
+              tmpString.substring(0, tmpString.length - 1);
+          optionalDataRaw = firstLine.substring(15 + tmpString.length, 30);
+          isLongDocumentNumber = true;
+        } else {
+          documentNumberRaw = firstLine.substring(5, 14);
+          documentNumberCheckDigitRaw = firstLine[14];
+          optionalDataRaw = firstLine.substring(15, 30);
+          isLongDocumentNumber = false;
+        }
+      }
     } else {
-      // Normal TD1 case
-      documentNumberRaw = firstLine.substring(5, 14);
-      documentNumberCheckDigitRaw = firstLine[14];
-      optionalDataRaw = firstLine.substring(15, 30);
-      isLongDocumentNumber = false;
+      // Caso estándar para otros documentos TD1
+      if (firstLine[14] == '<') {
+        final tmpString =
+            firstLine.substring(15, 28).replaceAll(RegExp(r'<+$'), '');
+        documentNumberCheckDigitRaw = tmpString[tmpString.length - 1];
+        documentNumberRaw = firstLine.substring(5, 14) +
+            tmpString.substring(0, tmpString.length - 1);
+        optionalDataRaw = firstLine.substring(15 + tmpString.length, 30);
+        isLongDocumentNumber = true;
+      } else {
+        documentNumberRaw = firstLine.substring(5, 14);
+        documentNumberCheckDigitRaw = firstLine[14];
+        optionalDataRaw = firstLine.substring(15, 30);
+        isLongDocumentNumber = false;
+      }
     }
 
     final birthDateRaw = secondLine.substring(0, 6);
@@ -116,7 +135,6 @@ class _TD1MRZFormatParser {
 
     final String documentNumberFixedForCheckString;
     if (isLongDocumentNumber) {
-      // Long document number requires to re-introduce the < at position 15
       documentNumberFixedForCheckString =
           '${documentNumberFixed.substring(0, 9)}<${documentNumberFixed.substring(9, documentNumberFixed.length)}';
     } else {
