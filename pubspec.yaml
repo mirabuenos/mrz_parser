@@ -1,5 +1,5 @@
 name: mrz_parser_esp
-description: Parse MRZ (Machine Readable Zone) from identity documents. Enhanced support for Spanish IDs.
+description: Parse MRZ (Machine Readable Zone mrz) from identity documents. Enhanced support for Spanish IDs.
 version: 1.0.0
 homepage: https://github.com/mirabuenos/mrz_parser
 environment:
