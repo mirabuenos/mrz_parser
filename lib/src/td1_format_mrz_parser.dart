@@ -27,38 +27,27 @@ class _TD1MRZFormatParser {
     final String optionalDataRaw;
     final bool isLongDocumentNumber;
 
-    // Nueva lógica para extraer el número de documento
-    if (firstLine.startsWith('IDESP')) {
-      // Caso específico para DNI español
-      final fullNumber = firstLine.substring(5).split('<')[0];
-      final numberMatch = RegExp(r'(\d{8}[A-Z])').firstMatch(fullNumber);
-      if (numberMatch != null) {
-        documentNumberRaw = numberMatch.group(1)!;
-        documentNumberCheckDigitRaw = documentNumberRaw[documentNumberRaw.length - 1];
-        optionalDataRaw = firstLine.substring(5 + fullNumber.length, 30);
-        isLongDocumentNumber = false;
+    // Obtener el patrón del país
+    final countryPattern = MRZCountryPatterns.getCountryPattern(firstLine);
+
+    if (countryPattern != null) {
+      // Usar el patrón específico del país
+      final match = countryPattern.documentNumberPattern.firstMatch(
+          firstLine.substring(countryPattern.documentNumberStartIndex));
+      
+      if (match != null) {
+        documentNumberRaw = match.group(1)!;
+        final endIndex = countryPattern.documentNumberStartIndex + match.group(0)!.length;
+        documentNumberCheckDigitRaw = firstLine[endIndex];
+        optionalDataRaw = firstLine.substring(endIndex + 1, 30);
+        isLongDocumentNumber = documentNumberRaw.length > 9;
       } else {
-        // Si no encuentra el patrón esperado, usa el método original
-        if (firstLine[14] == '<') {
-          final tmpString =
-              firstLine.substring(15, 28).replaceAll(RegExp(r'<+$'), '');
-          documentNumberCheckDigitRaw = tmpString[tmpString.length - 1];
-          documentNumberRaw = firstLine.substring(5, 14) +
-              tmpString.substring(0, tmpString.length - 1);
-          optionalDataRaw = firstLine.substring(15 + tmpString.length, 30);
-          isLongDocumentNumber = true;
-        } else {
-          documentNumberRaw = firstLine.substring(5, 14);
-          documentNumberCheckDigitRaw = firstLine[14];
-          optionalDataRaw = firstLine.substring(15, 30);
-          isLongDocumentNumber = false;
-        }
+        throw const InvalidDocumentNumberException();
       }
     } else {
-      // Caso estándar para otros documentos TD1
+      // Comportamiento predeterminado para documentos no reconocidos
       if (firstLine[14] == '<') {
-        final tmpString =
-            firstLine.substring(15, 28).replaceAll(RegExp(r'<+$'), '');
+        final tmpString = firstLine.substring(15, 28).replaceAll(RegExp(r'<+$'), '');
         documentNumberCheckDigitRaw = tmpString[tmpString.length - 1];
         documentNumberRaw = firstLine.substring(5, 14) +
             tmpString.substring(0, tmpString.length - 1);
@@ -87,20 +76,12 @@ class _TD1MRZFormatParser {
     final countryCodeFixed =
         MRZFieldRecognitionDefectsFixer.fixCountryCode(countryCodeRaw);
     final documentNumberFixed = documentNumberRaw;
-
     final documentNumberCheckDigitFixed =
-        MRZFieldRecognitionDefectsFixer.fixCheckDigit(
-      documentNumberCheckDigitRaw,
-    );
-
+        MRZFieldRecognitionDefectsFixer.fixCheckDigit(documentNumberCheckDigitRaw);
     final optionalDataFixed = optionalDataRaw;
-
-    final birthDateFixed =
-        MRZFieldRecognitionDefectsFixer.fixDate(birthDateRaw);
-
+    final birthDateFixed = MRZFieldRecognitionDefectsFixer.fixDate(birthDateRaw);
     final birthDateCheckDigitFixed =
         MRZFieldRecognitionDefectsFixer.fixCheckDigit(birthDateCheckDigitRaw);
-
     final sexFixed = MRZFieldRecognitionDefectsFixer.fixSex(sexRaw);
     final expiryDateFixed =
         MRZFieldRecognitionDefectsFixer.fixDate(expiryDateRaw);
@@ -121,14 +102,12 @@ class _TD1MRZFormatParser {
 
     final birthDateIsValid = int.tryParse(birthDateCheckDigitFixed) ==
         MRZCheckDigitCalculator.getCheckDigit(birthDateFixed);
-
     if (!birthDateIsValid) {
       throw const InvalidBirthDateException();
     }
 
     final expiryDateIsValid = int.tryParse(expiryDateCheckDigitFixed) ==
         MRZCheckDigitCalculator.getCheckDigit(expiryDateFixed);
-
     if (!expiryDateIsValid) {
       throw const InvalidExpiryDateException();
     }
@@ -150,15 +129,13 @@ class _TD1MRZFormatParser {
 
     final finalCheckStringIsValid = int.tryParse(finalCheckDigitFixed) ==
         MRZCheckDigitCalculator.getCheckDigit(finalCheckStringFixed);
-
     if (!finalCheckStringIsValid) {
       throw const InvalidMRZValueException();
     }
 
     final documentType = MRZFieldParser.parseDocumentType(documentTypeFixed);
     final countryCode = MRZFieldParser.parseCountryCode(countryCodeFixed);
-    final documentNumber =
-        MRZFieldParser.parseDocumentNumber(documentNumberFixed);
+    final documentNumber = MRZFieldParser.parseDocumentNumber(documentNumberFixed);
     final optionalData = MRZFieldParser.parseOptionalData(optionalDataFixed);
     final birthDate = MRZFieldParser.parseBirthDate(birthDateFixed);
     final sex = MRZFieldParser.parseSex(sexFixed);
