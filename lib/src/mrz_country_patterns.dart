@@ -1,4 +1,4 @@
-part of 'mrz_parser.dart';
+library mrz_parser_esp;
 
 class MRZCountryPattern {
   final String countryCode;
