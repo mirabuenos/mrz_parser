@@ -1,4 +1,4 @@
-library mrz_parser_esp;
+import 'sex.dart';
 
 class MRZCountryPattern {
   final String countryCode;
