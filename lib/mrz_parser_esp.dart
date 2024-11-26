@@ -1,8 +1,8 @@
 library mrz_parser_esp;
 
+export 'src/sex.dart';  // Primero este
 export 'src/mrz_exceptions.dart';
 export 'src/mrz_result.dart';
-export 'src/sex.dart';
 export 'src/mrz_country_patterns.dart';
 
 part 'src/mrz_parser.dart';
