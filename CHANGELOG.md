@@ -1,3 +1,8 @@
+## [1.0.1]
+* Fixed Sex enum ambiguity
+* Updated package structure and imports
+* Added support for European ID formats
+
 ## [2.0.1]
 
 * Implements new ICAO9303 part 5 long document numbers for TD1 (by @nicoinn)
