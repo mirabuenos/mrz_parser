@@ -1,8 +1,18 @@
-library mrz_parser;
+library mrz_parser_esp;
 
 export 'src/sex.dart';
-import 'package:mrz_parser/src/mrz_exceptions.dart';
-import 'package:mrz_parser/src/mrz_result.dart';
+import 'src/mrz_exceptions.dart';
+import 'src/mrz_result.dart';
+import 'src/mrz_checkdigit_calculator.dart';
+import 'src/mrz_field_parser.dart';
+import 'src/mrz_field_recognition_defects_fixer.dart';
+import 'src/mrz_string_extensions.dart';
+import 'src/td1_format_mrz_parser.dart';
+import 'src/td2_format_mrz_parser.dart';
+import 'src/td3_format_mrz_parser.dart';
+
+export 'src/mrz_exceptions.dart';
+export 'src/mrz_result.dart';
 
 part 'mrz_checkdigit_calculator.dart';
 part 'mrz_field_parser.dart';
