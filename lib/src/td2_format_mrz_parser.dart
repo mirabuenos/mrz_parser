@@ -1,4 +1,4 @@
-part of '../mrz_parser.dart';
+part of '../mrz_parser_esp.dart';
 
 class _TD2MRZFormatParser {
   _TD2MRZFormatParser._();
