@@ -6,7 +6,7 @@ abstract class MRZException implements Exception {
   @override
   String toString() =>
       '$message. If you think this is a mistake, please file an issue '
-      'https://github.com/olexale/mrz_parser/issues';
+      'https://github.com/mirabuenos/mrz_parser/issues'
 }
 
 class InvalidMRZInputException extends MRZException {
