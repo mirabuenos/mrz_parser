@@ -1,7 +1,5 @@
 part of 'mrz_parser.dart';
 
-import 'sex.dart';
-
 class MRZFieldParser {
   MRZFieldParser._();
 
