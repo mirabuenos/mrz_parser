@@ -1,5 +1,6 @@
 library mrz_parser;
 
+export 'src/sex.dart';
 import 'package:mrz_parser/src/mrz_exceptions.dart';
 import 'package:mrz_parser/src/mrz_result.dart';
 
