@@ -39,7 +39,7 @@ class MRZFieldParser {
       case 'F':
         return Sex.female;
       default:
-        return Sex.none;
+        return Sex.unspecified;  // Cambiado de Sex.none a Sex.unspecified
     }
   }
 
