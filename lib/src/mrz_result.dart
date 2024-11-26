@@ -1,4 +1,4 @@
-enum Sex { none, male, female }
+import 'sex.dart';
 
 class MRZResult {
   const MRZResult({
