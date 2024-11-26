@@ -1,3 +1,5 @@
+part of '../mrz_parser_esp.dart';
+
 library mrz_parser_esp;
 
 export 'src/sex.dart';
